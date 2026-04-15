@@ -1,0 +1,56 @@
+const jwt = require("jsonwebtoken");
+const base64url = require("base64url");
+
+function validateJwtWithFixedClaims(token, secret, issuer, audience) {
+  try {
+    // Step 1: Decode header and payload WITHOUT verifying signature
+    const parts = token.split('.');
+    if (parts.length !== 3) return false;
+
+    const payload = JSON.parse(base64url.decode(parts[1]));
+
+    // Step 2: Check for required claims: sub, jti, iat
+    if (!payload.sub || !payload.jti || !payload.iat) {
+      return false;
+    }
+
+    // Step 3: Verify signature, issuer, and audience using jsonwebtoken
+    jwt.verify(token, secret, {
+      issuer: issuer,
+      audience: audience,
+      algorithms: ['HS256']
+    });
+
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+// do not modify the test cases below
+console.log(
+  validateJwtWithFixedClaims(
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzdWItdmFsdWUtMSIsImp0aSI6Imp0aS12YWx1ZS0xIiwiaWF0IjoxNjI2MzAwMDAwLCJpc3MiOiJ5b3VyLWlzc3VlciIsImF1ZCI6InlvdXItYXVkaWVuY2UifQ.MLB4TiTE40ps89RPesxASz0SzUMe_i3NDmmykZiv1ps",
+    "your-secret-key-1234",
+    "your-issuer",
+    "your-audience"
+  )
+);
+
+console.log(
+  validateJwtWithFixedClaims(
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzdWItdmFsdWUtMiIsImp0aSI6Imp0aS12YWx1ZS0yIiwiaWF0IjoxNjI2MzAwMDAwLCJpc3MiOiJ5b3VyLWlzc3VlciIsImF1ZCI6InlvdXItYXVkaWVuY2UifQ.JfAplxAAGrgIxylf7r2jB8SjofZiRQn40XsGK4AIZcg",
+    "your-secret-key-1234",
+    "your-issuer",
+    "your-audience"
+  )
+);
+
+console.log(
+  validateJwtWithFixedClaims(
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzdWItdmFsdWUtMyIsImp0aSI6Imp0aS12YWx1ZS0zIiwiaWF0IjoxNjI2MzAwMDAwLCJpc3MiOiJkaWZmZXJlbnQtaXNzdWVyIiwiYXVkIjoiZGlmZmVyZW50LWF1ZGllbmNlIn0.wueIvHzH1-JCOCGwb4sdOoHbPu1tZUXOEHnvGH9RdEY",
+    "your-secret-key-1234",
+    "different-issuer",
+    "different-audience"
+  )
+);
